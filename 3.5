@@ -1,0 +1,85 @@
+3.5.1. High availability of Namenode :
+
+- In each cluster,2 separate machines are configured as namenodes ,out of these 2 name nodes one is  active name node
+  and other is standby name node that is at a time one machine is in the active state and other one is in stand by state,
+  which represents a active-standby configuration.
+  
+- The active name node is responsible for all client operations in the cluster.
+
+- when failure of active name node occurs,the stand by name node takes over the control without any interruption.
+
+- The standby name node maintains enough state to provide a fast failover. In order for the Standby node to keep its state 
+  synchronized with the Active node, both nodes communicate through a group of separate daemons called Journal Nodes.
+  
+- In order to provide a fast failover, it is necessary that the Standby node have up-to-date information of the location of
+  blocks in our cluster. DataNodes are configured with the location of both the name node and send block location information
+  and heartbeats to both name node.
+  
+  
+  
+  3.5.2. Check Pointing :
+  
+  HDFS metadata can be thought of consisting of two parts:
+  
+  -- fsimage(file system image) : the base filesystem table (stored in a file called fsimage).
+  -- Edits : When any operation takes place in HDFS, the directory structure gets modified.These modifications are stored 
+     in the memory as well as in the edits files (edits files are stored on the hard disk).Edit logs lists the changes made
+     to the base table(stored in a file called edits)
+    
+     Checkpointing- 
+     
+  >> Checkpointing is a process of merging fsimage with edits to produce a new version of fsimage or updated fsimage file.
+     Checkpointing is carried by secondary name node. It takes the fsimage and edits files from the name node and returns
+     updated fsimage file after merging. 
+  >> Checkpointing is useful as it is a process that takes an fsimage and edit log and compacts them into a new fsimage. This
+     way, instead of replaying a potentially unbounded edit log, the name node can load the final in-memory state directly from the 
+     fsimage. This is a far more efficient operation and reduces NameNode startup time
+
+  
+  
+  3.5.3. HDFS Federation :
+   
+   - HDFS Federation helps us to enhance the existing HDFS architecture.HDFS Federation improves the existing HDFS architecture through
+     a  separation of namespace and storage thus enables scalability and isolation at cluster level.
+   - In the HDFS Federation, there are multiple NameNodes, each storing the metadata and block mapping of files and directories contained
+     in particular sub-directories.
+   - The list of sub-directories managed by a NameNode is called a namespace volume.
+   - Blocks for files belonging to a namespace is called a block pool.
+   - If one NameNode fails, a namespace volume managed by an other namenode which is still accessible. So the entire cluster doesn’t
+     become inaccessible.
+   - One DataNode can contain blocks of different namespace volumes So, namespace volumes are divided among NameNodes, but not among 
+     DataNodes.
+
+
+
+ 3.5.4. The files that need to be configured explicitly while installing hadoop cluster:
+
+>> Core-site.xml
+>> HDFS-site.xml  
+>> YARN-site.xml
+>> xml
+
+
+-- To all xml files  we can specify the new value with tags like <property>, <name>, <description>, <final>, etc. inside predefined 
+<configuration> tag. As Hadoop is an open source framework so the owners have provided option to override some features by declaring
+some attribute inside various site.xml files.
+
+-- Core-site.xml has following important properties -
+* It helps in configuring the name node address.
+* Not only name node address it helps in configuring the rack awareness factor.
+* Selecting the type of security.
+
+-- HDFS-site.xml deals with storage procedure inside HDFS of Hadoop and has following important properties -
+* It can be used to Configure port access
+* It Manages ssl client authentication
+* It helps in controlling Network interface
+* Also helps in changing file permission
+
+-- YARN-site.xml has Resource Manager settings which effects resource allocation with node manager and application manager. Some of 
+   the important properties are:
+
+* WebAppProxy Configuration
+* MapReduce Configuration
+* NodeManager Configuration
+* ResourceManager Configuration
+* IPC Configuration
